@@ -2,7 +2,6 @@ fastapi
 uvicorn
 pydantic
 pydantic-settings
-email-validator
 supabase
 google-generativeai
 chromadb
@@ -12,3 +11,4 @@ python-jose[cryptography]
 google-auth
 python-multipart
 requests
+email-validator
