@@ -1,51 +1,68 @@
-import google.generativeai as genai
-from app.core.config import settings
+from sentence_transformers import SentenceTransformer
 from typing import List
 
 
-class GeminiEmbedder:
+class MultilingualEmbedder:
     def __init__(self):
-        if not settings.GOOGLE_API_KEY:
-            raise ValueError("GOOGLE_API_KEY is missing")
+        """
+        Multilingual embedding model supporting:
+        - English
+        - Hindi
+        - Bengali
+        """
 
-        genai.configure(api_key=settings.GOOGLE_API_KEY)
+        self.model = SentenceTransformer(
+            "intfloat/multilingual-e5-base"
+        )
 
-        self.model_name = "models/text-embedding-004"
+        print("✅ Multilingual E5 Embedder Initialized")
 
-        print("✅ Gemini Embedder Initialized")
+    def embed_documents(
+        self,
+        texts: List[str]
+    ) -> List[List[float]]:
+        """
+        Generate embeddings for document chunks.
+        """
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
         try:
-            embeddings = []
-
-            for text in texts:
-                response = genai.embed_content(
-                    model=self.model_name,
-                    content=text,
-                    task_type="retrieval_document"
-                )
-
-                embeddings.append(response["embedding"])
-
-            return embeddings
-
-        except Exception as e:
-            print(f"❌ Document Embedding Error: {str(e)}")
-            raise
-
-    def embed_query(self, text: str) -> List[float]:
-        try:
-            response = genai.embed_content(
-                model=self.model_name,
-                content=text,
-                task_type="retrieval_query"
+            embeddings = self.model.encode(
+                texts,
+                normalize_embeddings=True,
+                convert_to_numpy=True
             )
 
-            return response["embedding"]
+            return embeddings.tolist()
 
         except Exception as e:
-            print(f"❌ Query Embedding Error: {str(e)}")
+            print(
+                f"❌ Document Embedding Error: {str(e)}"
+            )
+            raise
+
+    def embed_query(
+        self,
+        text: str
+    ) -> List[float]:
+        """
+        Generate embedding for user query.
+        """
+
+        try:
+            embedding = self.model.encode(
+                text,
+                normalize_embeddings=True,
+                convert_to_numpy=True
+            )
+
+            return embedding.tolist()
+
+        except Exception as e:
+            print(
+                f"❌ Query Embedding Error: {str(e)}"
+            )
             raise
 
 
-embedder = GeminiEmbedder()
+# Singleton Instance
+embedder = MultilingualEmbedder()
