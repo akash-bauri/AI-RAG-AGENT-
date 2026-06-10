@@ -1,32 +1,60 @@
-from sentence_transformers import SentenceTransformer
 from typing import List
+
+_model = None
+
+
+def get_model():
+    global _model
+
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+
+        print("Loading embedding model...")
+
+        _model = SentenceTransformer(
+            "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        )
+
+        print("Embedding model loaded successfully")
+
+    return _model
 
 
 class MultilingualEmbedder:
-    def __init__(self):
-        self.model = SentenceTransformer(
-            "paraphrase-multilingual-MiniLM-L12-v2"
-        )
-
-        print("✅ Lightweight Multilingual Embedder Initialized")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        embeddings = self.model.encode(
-            texts,
-            normalize_embeddings=True,
-            convert_to_numpy=True
-        )
+        try:
+            model = get_model()
 
-        return embeddings.tolist()
+            embeddings = model.encode(
+                texts,
+                batch_size=16,
+                normalize_embeddings=True,
+                convert_to_numpy=True,
+                show_progress_bar=False
+            )
+
+            return embeddings.tolist()
+
+        except Exception as e:
+            print(f"Document Embedding Error: {e}")
+            raise
 
     def embed_query(self, text: str) -> List[float]:
-        embedding = self.model.encode(
-            text,
-            normalize_embeddings=True,
-            convert_to_numpy=True
-        )
+        try:
+            model = get_model()
 
-        return embedding.tolist()
+            embedding = model.encode(
+                text,
+                normalize_embeddings=True,
+                convert_to_numpy=True
+            )
+
+            return embedding.tolist()
+
+        except Exception as e:
+            print(f"Query Embedding Error: {e}")
+            raise
 
 
 embedder = MultilingualEmbedder()
