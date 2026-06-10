@@ -1,25 +1,16 @@
 fastapi
-uvicorn[standard]
-
+uvicorn
 pydantic
 pydantic-settings
-
 supabase
-
 google-generativeai
-google-auth
-
 chromadb
-
 pypdf
 langdetect
-
 python-jose[cryptography]
+google-auth
 python-multipart
-
 requests
 email-validator
 
 sentence-transformers
-torch
-numpy
