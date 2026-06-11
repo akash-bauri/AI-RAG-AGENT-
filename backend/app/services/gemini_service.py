@@ -1,19 +1,15 @@
-import google.generativeai as genai
+from google import genai
 from app.core.config import settings
 
 
 class GeminiGenerationService:
+
     def __init__(self):
-        if not settings.GOOGLE_API_KEY:
-            raise ValueError("GOOGLE_API_KEY is missing")
-
-        genai.configure(api_key=settings.GOOGLE_API_KEY)
-
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash"
+        self.client = genai.Client(
+            api_key=settings.GOOGLE_API_KEY
         )
 
-        print("✅ Gemini Service Initialized")
+        print("✅ Gemini Client Initialized")
 
     def generate_response(
         self,
@@ -24,39 +20,29 @@ class GeminiGenerationService:
     ) -> str:
 
         prompt = f"""
-You are Appna Bank AI, a friendly financial assistant.
-
-Respond in {language}.
-
-User Profile:
-{personalization}
+Answer in {language}
 
 Context:
 {context}
 
+Profile:
+{personalization}
+
 Question:
 {question}
-
-Rules:
-1. Use simple language.
-2. Explain like a 5th-grade student.
-3. Use practical examples.
-4. Keep answers short and useful.
-5. Suggest emergency savings before risky investments.
-6. Prefer government schemes when relevant.
 """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt
+            )
 
-            if hasattr(response, "text") and response.text:
-                return response.text
-
-            return "No response generated."
+            return response.text
 
         except Exception as e:
-            print(f"GEMINI ERROR: {str(e)}")
-            return f"Gemini Error: {str(e)}"
+            print(f"GEMINI ERROR: {e}")
+            return f"Gemini Error: {e}"
 
 
 gemini_service = GeminiGenerationService()
