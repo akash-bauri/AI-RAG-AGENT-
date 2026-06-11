@@ -6,7 +6,7 @@ pydantic-settings
 
 supabase
 
-google-genaI
+google-genai
 
 chromadb
 
