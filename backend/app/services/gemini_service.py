@@ -1,4 +1,5 @@
-from google import genai
+import google.generativeai as genai
+
 from app.core.config import settings
 
 
@@ -6,11 +7,15 @@ class GeminiGenerationService:
 
     def __init__(self):
 
-        self.client = genai.Client(
+        genai.configure(
             api_key=settings.GOOGLE_API_KEY
         )
 
-        print("✅ Gemini Client Initialized")
+        self.model = genai.GenerativeModel(
+            "gemini-1.5-flash"
+        )
+
+        print("✅ Gemini Initialized")
 
     def generate_response(
         self,
@@ -35,23 +40,20 @@ Question:
 
         try:
 
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
+            response = self.model.generate_content(
+                prompt
             )
 
-            if hasattr(response, "text"):
+            if response.text:
                 return response.text
 
-            return str(response)
+            return "No response generated."
 
         except Exception as e:
 
-            print(f"❌ GEMINI ERROR: {e}")
+            print(f"GEMINI ERROR: {e}")
 
-            return (
-                "Sorry, I am unable to generate a response right now."
-            )
+            return f"Gemini Error: {str(e)}"
 
 
 gemini_service = GeminiGenerationService()
